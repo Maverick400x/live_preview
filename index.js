@@ -85,6 +85,12 @@ app.get("/", (req, res) => {
   });
 });
 
+app.get("/users/login", (req, res) => {
+  res.render("login", {
+    bgImage: "/images/register_bg.jpg"
+  });
+});
+
 // 404
 app.use((req, res) => {
   res.status(404).send("<h1>404 - Page Not Found</h1>");
