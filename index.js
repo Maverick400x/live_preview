@@ -8,40 +8,46 @@ import orderRoutes from "./routes/order.routes.js";
 import contactRoutes from "./routes/contact.routes.js";
 import { loggerMiddleware } from "./middlewares/logger.middleware.js";
 import path from "path";
-import { products } from "./models/product.model.js"; // Product data
-import { orders } from "./models/order.model.js";     // Orders data
+import { products } from "./models/product.model.js";
+import { orders } from "./models/order.model.js";
 import dotenv from "dotenv";
 
 dotenv.config();
 const app = express();
 const PORT = 3000;
 
-
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
-app.use(session({ secret: "secret-key", resave: false, saveUninitialized: true }));
+app.use(session({
+  secret: "secret-key",
+  resave: false,
+  saveUninitialized: true
+}));
 
-// Logger
+// Logger Middleware
 app.use(loggerMiddleware);
 
-// View engine
+// View Engine Setup
 app.set("view engine", "ejs");
 app.set("views", path.join(process.cwd(), "views"));
+app.set("public", path.join(process.cwd(), "public")); // ✅ Public folder path for dynamic use
 
-// Routes
+// Route Handlers
 app.use("/products", productRoutes);
 app.use("/cart", cartRoutes);
 app.use("/users", userRoutes);
 app.use("/orders", orderRoutes);
 app.use("/contact", contactRoutes);
 
-// Discounts
+// Discounts Page
 app.get("/discounts", (req, res) => {
-  res.render("discounts", { user: req.session.user });
+  res.render("discounts", {
+    user: req.session.user
+  });
 });
 
-// Future updates
+// Future Updates Page
 app.get("/future-updates", (req, res) => {
   res.render("futureUpdates", {
     title: "Future Updates",
@@ -49,22 +55,18 @@ app.get("/future-updates", (req, res) => {
   });
 });
 
-// ✅ Account Dashboard with address, phone, totalOrders, allBooks
-app.get('/users/account', (req, res) => {
-  if (!req.session.user) return res.redirect('/users/login');
+// ✅ Account Dashboard Route
+app.get("/users/account", (req, res) => {
+  if (!req.session.user) return res.redirect("/users/login");
 
   const user = req.session.user;
-
-  // Find orders for this user
   const userOrders = orders.filter(order => order.userId === user.id);
   const latestOrder = userOrders[userOrders.length - 1];
 
-  // Get all book titles from all orders
   const allBooks = userOrders.flatMap(order =>
     order.items.map(item => item.title)
   );
 
-  // Build enriched user object for template
   const enrichedUser = {
     ...user,
     address: latestOrder?.address || "Not available",
@@ -73,10 +75,10 @@ app.get('/users/account', (req, res) => {
     allBooks
   };
 
-  res.render('account', { user: enrichedUser });
+  res.render("account", { user: enrichedUser });
 });
 
-// Home page
+// Home Page
 app.get("/", (req, res) => {
   res.render("home", {
     title: "Online Bookstore",
@@ -85,18 +87,12 @@ app.get("/", (req, res) => {
   });
 });
 
-app.get("/users/login", (req, res) => {
-  res.render("login", {
-    bgImage: "/images/register_bg.jpg"
-  });
-});
-
-// 404
+// 404 Handler
 app.use((req, res) => {
   res.status(404).send("<h1>404 - Page Not Found</h1>");
 });
 
-// Server start
+// Server Listener
 app.listen(PORT, () =>
   console.log(`✅ Server running on http://localhost:${PORT}`)
 );
