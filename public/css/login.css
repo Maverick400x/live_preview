@@ -1,7 +1,7 @@
 body {
   margin: 0;
   font-family: 'Segoe UI', sans-serif;
-  background-image: url('/src/register_bg.jpg'); /* Use same or a different background */
+  background-image: url('../src/register_bg.jpg'); /* Use same or a different background */
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
